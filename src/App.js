@@ -1,32 +1,34 @@
-import {useState,useCallback,useEffect} from "react";
+import {useState,useCallback,useEffect,useRef} from "react";
 
 function App() {
   const [password,setpassword]=useState("");
   const [length,setLength]=useState(8);
   const [isNumberAllowed,setNumberAllowed]=useState(false);
   const [isSpecialCharacterAllowed,setSpecialCharacterAllowed]=useState(false);
-  const passGen=useCallback($_passwordGenerator,[length,isNumberAllowed,isSpecialCharacterAllowed]);
+  const passGen=useCallback($_passwordGenerator,[length,isNumberAllowed,isSpecialCharacterAllowed,setpassword]);
+  const passwordRef=useRef(null);
 
 
   useEffect(()=>{
     passGen()
-               },[length,isNumberAllowed,isNumberAllowed])
+               },[length,isNumberAllowed,isSpecialCharacterAllowed])
 
   function $_passwordGenerator() {
     let generatedPassword = "";
     for (let i = 0; i < length; i++) {
         let str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-        if(isNumberAllowed){
-            str+="0123456789";
-        }
-        if(isSpecialCharacterAllowed){
-            str+="~!@#$%^&*";
-        }
+        if(isNumberAllowed) str+="0123456789";
+        if(isSpecialCharacterAllowed) str+="~!@#$%^&*";
         generatedPassword += str[$_randomIndex(str.length)];
     }
     setpassword(generatedPassword);
 }
 
+  function $_copytoClipboard(){
+    window.navigator.clipboard.writeText(password);
+    passwordRef.current?.select();
+    passwordRef.current?.setSelectionRange(0,101);
+  }
 
 function $_randomIndex(strLen) {
     return Math.floor(Math.random() * strLen);
@@ -43,9 +45,13 @@ function $_randomIndex(strLen) {
                   className="w-full h-full pl-5 text-xl text-yellow-500 "
                   value={password}
                   placeholder="Password"
+                  ref={passwordRef}
                   read-only
                 ></input>
-                <button className=" w-24 h-full bg-blue-500 text-white">
+                <button className=" w-24 h-full bg-blue-500 text-white" 
+                  onClick={()=>{
+                   $_copytoClipboard();
+                  }}>
                   Copy
                 </button>
               </div>
